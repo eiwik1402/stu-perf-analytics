@@ -61,6 +61,8 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
         else:
             # Nếu là số dạng string ("0", "1", "2",...)
             df["has_extra"] = (pd.to_numeric(col, errors="coerce").fillna(0) > 0).astype(int)
+        df.drop(columns=["extra_activities"], inplace=True)
+        print(f"[fe]    'extra_activities' → 'has_extra' (0/1), cột gốc đã drop")
 
     print(f"[fe]    Features sau engineering: {df.shape[1]} cột")
     return df
@@ -68,7 +70,8 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
 BINARY_COLS  = ["internet_access"]                    # gender đã drop ở DROP_COLS
 ORDINAL_COLS = ["parent_education"]                   # có thứ tự ngầm định
 NOMINAL_COLS = ["school_type", "study_method"]        # không có thứ tự → one-hot
-EDUCATION_ORDER = ["none", "primary", "secondary", "bachelor", "master", "phd"]
+EDUCATION_ORDER   = ["none", "primary", "secondary", "bachelor", "master", "phd"]
+TRAVEL_TIME_ORDER = ["<15 min", "15-30 min", "30-60 min", ">60 min"]
  
  
 def encode_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -88,6 +91,17 @@ def encode_features(df: pd.DataFrame) -> pd.DataFrame:
             .astype(int)
         )
         print(f"[encode] 'parent_education': ordinal-encode")
+
+    if "travel_time" in df.columns:
+        travel_map = {v: i for i, v in enumerate(TRAVEL_TIME_ORDER)}
+        df["travel_time"] = (
+            df["travel_time"]
+            .str.strip()
+            .map(travel_map)
+            .fillna(-1)           # giá trị chưa biết → -1
+            .astype(int)
+        )
+        print(f"[encode] 'travel_time': ordinal-encode → {sorted(df['travel_time'].unique())}")
  
     existing_nominal = [c for c in NOMINAL_COLS if c in df.columns]
     if existing_nominal:
