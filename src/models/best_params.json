@@ -1,0 +1,10 @@
+{
+    "logistic_regression": {
+        "C": 100,
+        "cv_precision": 0.765
+    },
+    "ridge_regression": {
+        "alpha": 1,
+        "cv_r2": 0.9533
+    }
+}
